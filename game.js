@@ -12,7 +12,12 @@ var t_background = PIXI.Texture.from("images/earth4.png");
 var background = new PIXI.Sprite(t_background);
 main.addChild(background);
 
-//Main menu
+
+/* * * * * * * * * * * * * * * * * * * * *
+ * MAIN MENU                             *
+ * Creates the main menu and all of its  *
+ * functionality.                        *
+ * * * * * * * * * * * * * * * * * * * * */
 var menu_bkd = PIXI.Texture.from("images/menu/menu_bkd.png");
 var menu_bkd = new PIXI.Sprite(menu_bkd);
 menu_bkd.position.x = 736;
@@ -246,20 +251,88 @@ cred_back.mousedown = function(ev)
 	menu_bkd.removeChild(menu3);
 	menu_bkd.addChild(menu1);
 }
-/*
-var texture = PIXI.Texture.fromImage("planetPurp.png");
 
-var sprite = new PIXI.TilingSprite(texture, renderer.width, renderer.height);
 
-stage.addChild(sprite);
+
+var t_player = PIXI.Texture.from("images/pirateShip.png");
+
+var player = new PIXI.Sprite(t_player);
+player.position.x = 100;
+player.position.y = 300;
+main.addChild(player);
+
+//var sprite = new PIXI.TilingSprite(texture, renderer.width, renderer.height);
+//stage.addChild(sprite);
+var new_x = player.position.x;
+var new_y = player.position.y;
+var keyListener = ['', '', '', ''];
+function keydownEventHandler(e)
+{
+	if (menu.parent == undefined)
+	{
+		if (e.keyCode == 87) //W key
+		{
+			keyListener[0] = 'w';	
+		}
+		else if (e.keyCode == 83) //S key
+		{
+			keyListener[1] = 's';
+		}
+		if (e.keyCode == 65) //A key
+		{
+			keyListener[2] = 'a';
+		}
+		else if (e.keyCode == 68) //D key
+		{
+			keyListener[3] = 'd';
+		}
+	}
+}
+function keyupEventHandler(e)
+{
+	if (e.keyCode == 87) //W key
+	{
+		keyListener[0] = '';
+	}
+	else if (e.keyCode == 83) //S key
+	{
+		keyListener[1] = '';
+	}
+	if (e.keyCode == 65) //A key
+	{
+		keyListener[2] = '';
+	}
+	else if (e.keyCode == 68) //D key
+	{
+		keyListener[3] = '';
+	}
+}
+document.addEventListener('keydown', keydownEventHandler);
+document.addEventListener('keyup', keyupEventHandler);
 
 let count = 0;
-	
-
-
 function animate() 
 {
 	requestAnimationFrame(animate);
+
+	if (keyListener[0] == 'w')
+	{
+		new_y -= 3;
+	}
+	else if (keyListener[1] == 's')
+	{
+		new_y += 3;
+	}
+	if (keyListener[2] == 'a')
+	{
+		new_x -= 3;
+	}
+	else if (keyListener[3] == 'd')
+	{
+		new_x += 3;
+	}
+	createjs.Tween.get(player.position).to({x: new_x, y: new_y}, 50);
+	/*
 	count +=0.005;
 	
 	tilingSprite.tileScale.x = 2 + Math.sin(count);
@@ -268,15 +341,8 @@ function animate()
 
 	tilingSprite.tilePosition.x += 1;
 	tilingSprite.tilePosition.y += 1;
+	*/
 	
-	renderer.render(stage);
-}
-*/
-
-function animate()
-{
-	requestAnimationFrame(animate);
 	renderer.render(main);
 }
-
 animate();
