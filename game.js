@@ -12,6 +12,30 @@ var t_background = PIXI.Texture.from("images/earth4.png");
 var background = new PIXI.Sprite(t_background);
 main.addChild(background);
 
+var t_asteroid_20 = PIXI.Texture.from("images/asteroids_20.png");
+var asteroid_20 = new PIXI.TilingSprite(t_asteroid_20, renderer.width, renderer.height);
+asteroid_20.alpha = 0.25;
+main.addChild(asteroid_20);
+
+var t_asteroid_15 = PIXI.Texture.from("images/asteroids_15.png");
+var asteroid_15 = new PIXI.TilingSprite(t_asteroid_15, renderer.width, renderer.height);
+asteroid_15.alpha = 0.5;
+main.addChild(asteroid_15);
+
+var t_asteroid_10 = PIXI.Texture.from("images/asteroids_10.png");
+var asteroid_10 = new PIXI.TilingSprite(t_asteroid_10, renderer.width, renderer.height);
+asteroid_10.alpha = 0.75;
+main.addChild(asteroid_10);
+
+var t_asteroid_5 = PIXI.Texture.from("images/asteroids_5.png");
+var asteroid_5 = new PIXI.TilingSprite(t_asteroid_5, renderer.width, renderer.height);
+main.addChild(asteroid_5);
+
+//Music
+const theme_1 = PIXI.sound.Sound.from('audio/Beyond\ The\ Heart\ -\ Lena\ Raine.mp3');
+theme_1.loop = true;
+theme_1.play();
+
 
 /* * * * * * * * * * * * * * * * * * * * *
  * MAIN MENU                             *
@@ -70,12 +94,13 @@ var t_back_neutral = PIXI.Texture.from('images/menu/back_neutral.png');
 var t_back_active = PIXI.Texture.from('images/menu/back_active.png');
 
 var t_volume = [];
-for (i=1; i<=8; i++)
+for (i=1; i<=9; i++)
 {
 	t_volume[i] = PIXI.Texture.from('images/menu/volume' + i + '.png');
 }
 
-var volume1 = new PIXI.Sprite(t_volume[8]);
+var vol_count1 = 9;
+var volume1 = new PIXI.Sprite(t_volume[vol_count1]);
 volume1.position.x = 114;
 volume1.position.y = 208;
 menu2.addChild(volume1);
@@ -90,7 +115,7 @@ loud1.position.y = 199;
 loud1.interactive = true;
 menu2.addChild(loud1);
 
-var volume2 = new PIXI.Sprite(t_volume[8]);
+var volume2 = new PIXI.Sprite(t_volume[9]);
 volume2.position.x = 114;
 volume2.position.y = 387;
 menu2.addChild(volume2);
@@ -177,7 +202,12 @@ quiet1.mouseout = function(ev)
 }
 quiet1.mousedown = function(ev)
 {
-	//TODO
+	if (theme_1.volume > 0)
+	{
+		theme_1.volume -= 0.125;
+		vol_count1 -= 1;
+		volume1.texture = t_volume[vol_count1];
+	}
 }
 
 loud1.hitArea = new PIXI.Rectangle(0, 0, 75, 53);
@@ -191,7 +221,12 @@ loud1.mouseout = function(ev)
 }
 loud1.mousedown = function(ev)
 {
-	//TODO
+	if (theme_1.volume < 1)
+	{
+		theme_1.volume += 0.125;
+		vol_count1 += 1;
+		volume1.texture = t_volume[vol_count1];
+	}
 }
 
 quiet2.hitArea = new PIXI.Rectangle(0, 0, 75, 53);
@@ -261,8 +296,6 @@ player.position.x = 100;
 player.position.y = 300;
 main.addChild(player);
 
-//var sprite = new PIXI.TilingSprite(texture, renderer.width, renderer.height);
-//stage.addChild(sprite);
 var new_x = player.position.x;
 var new_y = player.position.y;
 var keyListener = ['', '', '', ''];
@@ -285,6 +318,10 @@ function keydownEventHandler(e)
 		else if (e.keyCode == 68) //D key
 		{
 			keyListener[3] = 'd';
+		}
+		if (e.keyCode == 70) //F key
+		{
+			shoot(player.position.x + 120, player.position.y + 50);
 		}
 	}
 }
@@ -310,6 +347,25 @@ function keyupEventHandler(e)
 document.addEventListener('keydown', keydownEventHandler);
 document.addEventListener('keyup', keyupEventHandler);
 
+var t_bullet = PIXI.Texture.from("images/player_bullet.png");
+var bullets = [];
+var bulletSpeed = 10;
+
+function shoot(pos_x, pos_y)
+{
+	var bullet = new PIXI.Sprite(t_bullet);
+	bullet.position.x = pos_x;
+	bullet.position.y = pos_y;
+	bullet.scale.x = 0.5;
+	bullet.scale.y = 0.5;
+	main.addChild(bullet);
+	console.log('ublett');
+	bullets.push(bullet);
+}
+
+//var sprite = new PIXI.TilingSprite(texture, renderer.width, renderer.height);
+//stage.addChild(sprite);
+
 let count = 0;
 function animate() 
 {
@@ -332,6 +388,15 @@ function animate()
 		new_x += 3;
 	}
 	createjs.Tween.get(player.position).to({x: new_x, y: new_y}, 50);
+
+	for(var b=bullets.length-1;b>=0;b--)
+	{
+		bullets[b].position.x += bulletSpeed;
+  	}
+	asteroid_5.tilePosition.x -= 3;
+	asteroid_10.tilePosition.x -= 2;
+	asteroid_15.tilePosition.x -= 1;
+	asteroid_20.tilePosition.x -= 0.5;
 	/*
 	count +=0.005;
 	
