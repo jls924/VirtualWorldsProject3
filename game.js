@@ -296,7 +296,7 @@ cred_back.mousedown = function(ev)
 var t_player = PIXI.Texture.from("images/pirateShip.png");
 
 var player = new PIXI.Sprite(t_player);
-player.position.x = 100;
+player.position.x = 250;
 player.position.y = 300;
 main.addChild(player);
 
