@@ -99,6 +99,7 @@ for (i=1; i<=9; i++)
 	t_volume[i] = PIXI.Texture.from('images/menu/volume' + i + '.png');
 }
 
+//Music Volume
 var vol_count1 = 9;
 var volume1 = new PIXI.Sprite(t_volume[vol_count1]);
 volume1.position.x = 114;
@@ -115,6 +116,7 @@ loud1.position.y = 199;
 loud1.interactive = true;
 menu2.addChild(loud1);
 
+//Effects Volume
 var volume2 = new PIXI.Sprite(t_volume[9]);
 volume2.position.x = 114;
 volume2.position.y = 387;
@@ -130,6 +132,7 @@ loud2.position.y = 378;
 loud2.interactive = true;
 menu2.addChild(loud2);
 
+//Back button
 var opt_back = new PIXI.Sprite(t_back_neutral);
 opt_back.position.x = 174;
 opt_back.position.y = 528;
@@ -147,6 +150,7 @@ menu3.addChild(cred_back);
 //Start main menu
 main.addChild(menu);
 
+//Menu interactives behavior
 play.hitArea = new PIXI.Rectangle(0, 0, 128, 64);
 play.mouseover = function(ev)
 {
@@ -288,7 +292,7 @@ cred_back.mousedown = function(ev)
 }
 
 
-
+//Add player
 var t_player = PIXI.Texture.from("images/pirateShip.png");
 
 var player = new PIXI.Sprite(t_player);
@@ -296,6 +300,7 @@ player.position.x = 100;
 player.position.y = 300;
 main.addChild(player);
 
+//Player Behavior & input
 var new_x = player.position.x;
 var new_y = player.position.y;
 var keyListener = ['', '', '', ''];
@@ -347,6 +352,7 @@ function keyupEventHandler(e)
 document.addEventListener('keydown', keydownEventHandler);
 document.addEventListener('keyup', keyupEventHandler);
 
+//Bullet & Shooting
 var t_bullet = PIXI.Texture.from("images/player_bullet.png");
 var bullets = [];
 var bulletSpeed = 10;
