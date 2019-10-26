@@ -303,7 +303,7 @@ main.addChild(player);
 //Player Behavior & input
 var new_x = player.position.x;
 var new_y = player.position.y;
-var keyListener = ['', '', '', ''];
+var keyListener = ['', '', '', '', ''];
 function keydownEventHandler(e)
 {
 	if (menu.parent == undefined)
@@ -324,9 +324,9 @@ function keydownEventHandler(e)
 		{
 			keyListener[3] = 'd';
 		}
-		if (e.keyCode == 70) //F key
+		if (e.keyCode == 74) //J key
 		{
-			shoot(player.position.x + 120, player.position.y + 50);
+			keyListener[4] = 'j';
 		}
 	}
 }
@@ -348,6 +348,10 @@ function keyupEventHandler(e)
 	{
 		keyListener[3] = '';
 	}
+	if (e.keyCode == 74)
+	{
+		keyListener[4] = '';
+	}
 }
 document.addEventListener('keydown', keydownEventHandler);
 document.addEventListener('keyup', keyupEventHandler);
@@ -356,6 +360,10 @@ document.addEventListener('keyup', keyupEventHandler);
 var t_bullet = PIXI.Texture.from("images/player_bullet.png");
 var bullets = [];
 var bulletSpeed = 10;
+var bullet_timer = PIXI.timerManager.createTimer(200);
+bullet_timer.on('end', function(elapsed) {
+	bullet_timer.reset();
+});
 
 function shoot(pos_x, pos_y)
 {
@@ -369,31 +377,34 @@ function shoot(pos_x, pos_y)
 	bullets.push(bullet);
 }
 
-//var sprite = new PIXI.TilingSprite(texture, renderer.width, renderer.height);
-//stage.addChild(sprite);
-
 let count = 0;
 function animate() 
 {
 	requestAnimationFrame(animate);
 
-	if (keyListener[0] == 'w')
+	if (keyListener[0] == 'w' && player.position.y > 0)
 	{
 		new_y -= 3;
 	}
-	else if (keyListener[1] == 's')
+	else if (keyListener[1] == 's' && player.position.y < (renderer.height - player.texture.height))
 	{
 		new_y += 3;
 	}
-	if (keyListener[2] == 'a')
+	if (keyListener[2] == 'a' && player.position.x > 0)
 	{
 		new_x -= 3;
 	}
-	else if (keyListener[3] == 'd')
+	else if (keyListener[3] == 'd' && player.position.x < (renderer.width - player.texture.width))
 	{
 		new_x += 3;
 	}
 	createjs.Tween.get(player.position).to({x: new_x, y: new_y}, 50);
+
+	if (keyListener[4] == 'j' && !bullet_timer.isStarted)
+	{
+		shoot(player.position.x + 120, player.position.y + 50);
+		bullet_timer.start();
+	}
 
 	for(var b=bullets.length-1;b>=0;b--)
 	{
@@ -403,17 +414,7 @@ function animate()
 	asteroid_10.tilePosition.x -= 2;
 	asteroid_15.tilePosition.x -= 1;
 	asteroid_20.tilePosition.x -= 0.5;
-	/*
-	count +=0.005;
-	
-	tilingSprite.tileScale.x = 2 + Math.sin(count);
-	
-	tilingSprite.tileScale.y = 2 + Math.cos(count);
-
-	tilingSprite.tilePosition.x += 1;
-	tilingSprite.tilePosition.y += 1;
-	*/
-	
+	PIXI.timerManager.update();
 	renderer.render(main);
 }
 animate();
