@@ -31,6 +31,13 @@ var t_asteroid_5 = PIXI.Texture.from("images/asteroids_5.png");
 var asteroid_5 = new PIXI.TilingSprite(t_asteroid_5, renderer.width, renderer.height);
 main.addChild(asteroid_5);
 
+//Add player
+var t_player = PIXI.Texture.from("images/pirateShip.png");
+var player = new PIXI.Sprite(t_player);
+player.position.x = 250;
+player.position.y = 300;
+main.addChild(player);
+
 //Music
 const theme_1 = PIXI.sound.Sound.from('audio/Beyond\ The\ Heart\ -\ Lena\ Raine.mp3');
 theme_1.loop = true;
@@ -163,6 +170,9 @@ play.mouseout = function(ev)
 play.mousedown = function(ev)
 {
 	main.removeChild(menu);
+	main.addChild(stage);
+	main.removeChild(player);
+	stage.addChild(player);
 }
 
 options.hitArea = new PIXI.Rectangle(0, 0, 220, 64);
@@ -291,15 +301,6 @@ cred_back.mousedown = function(ev)
 	menu_bkd.addChild(menu1);
 }
 
-
-//Add player
-var t_player = PIXI.Texture.from("images/pirateShip.png");
-
-var player = new PIXI.Sprite(t_player);
-player.position.x = 250;
-player.position.y = 300;
-main.addChild(player);
-
 //Player Behavior & input
 var new_x = player.position.x;
 var new_y = player.position.y;
@@ -331,12 +332,11 @@ function keydownEventHandler(e)
 		if (e.keyCode == 82)// R key
 		{
 			enemy_shoot(federalShip.position.x + 120, federalShip.position.y + 50, "normal");
-=======
 			keyListener[4] = 'j';
->>>>>>> master
 		}
 	}
 }
+
 function keyupEventHandler(e)
 {
 	if (e.keyCode == 87) //W key
@@ -379,12 +379,52 @@ function shoot(pos_x, pos_y)
 	bullet.position.y = pos_y;
 	bullet.scale.x = 0.5;
 	bullet.scale.y = 0.5;
-	main.addChild(bullet);
+	stage.addChild(bullet);
 	console.log('ublett');
 	bullets.push(bullet);
 }
 
-<<<<<<< HEAD
+//Collision & helper functions
+//Circle needs to be a PIXI.Graphics circle, square needs to be a sprite
+function clamp(coor, min, max)
+{
+	if(coor < min)
+		return min;
+	else if (max < coor)
+		return max;
+	else
+		return coor;
+}
+
+function rect_clamp(point, rect)
+{
+	var clamp_p = new PIXI.Point();
+	var clx = clamp(point.x, rect.position.x, rect.position.x + rect.width);
+	var cly = clamp(point.y, rect.position.y, rect.position.y + rect.height);
+	clamp_p.set(clx, cly);
+	return clamp_p;
+}
+
+function circle_point_collide(circle, point)
+{
+	var cx = circle.position.x + circle.width/2;
+	var cy = circle.position.y + circle.width/2;
+	var dx = cx - point.x;
+	var dy = cy - point.y;
+	var distance = Math.sqrt((dx * dx) + (dy * dy));
+	//console.log('cx ', cx, '\ncy ', cy, '\ndx ', dx, '\ndy ', dy, '\ndistance ', distance);
+	return (distance <= circle.width/2);
+}
+
+function circle_rect_collide(circle, rect)
+{
+	var center = new PIXI.Point((circle.position.x + circle.width/2), (circle.position.y + circle.width/2));
+	var n_point = rect_clamp(center, rect);
+	//console.log('center ', center, '\nn_point ', n_point);
+	return circle_point_collide(circle, n_point);
+}
+
+
 /* * * * * * * * * * * * * * * * * * * * *
  * ENEMY INTERACTION                     *
  * Big shot, tri-shot, radial shot,      *
@@ -395,7 +435,8 @@ var t_fed = PIXI.Texture.from("images/federalShip.png");
 var federalShip = new PIXI.Sprite(t_fed);
 federalShip.position.x = 900;
 federalShip.position.y = 300;
-main.addChild(federalShip);
+//CHANGED FROM MAIN TO STAGE
+stage.addChild(federalShip);
 
 
 // big shot START HERE
@@ -419,7 +460,7 @@ function enemy_shoot(pos_x, pos_y, bulletType)
 	bullet.position.y = pos_y;
 	bullet.scale.x = 0.5;
 	bullet.scale.y = 0.5;
-	main.addChild(bullet);
+	stage.addChild(bullet);
 	console.log('enemy bullet');
 	bullets.push(bullet);
 }
@@ -435,45 +476,64 @@ function enemy_shoot(pos_x, pos_y, bulletType)
 //var sprite = new PIXI.TilingSprite(texture, renderer.width, renderer.height);
 //stage.addChild(sprite);
 
-=======
->>>>>>> master
+//Adding some test sprites here
+var t_asteroid = new PIXI.Texture.from("images/asteroid_standard.png");
+var coll_asteroid = new PIXI.Sprite(t_asteroid);
+coll_asteroid.position.x = 2000;
+coll_asteroid.position.y = 140;
+stage.addChild(coll_asteroid);
+
+var collider = new PIXI.Graphics();
+collider.beginFill(0,0);
+collider.drawCircle(coll_asteroid.position.x, coll_asteroid.position.y, coll_asteroid.texture.width/2);
+collider.endFill();
+stage.addChild(collider);
+
 let count = 0;
 function animate() 
 {
 	requestAnimationFrame(animate);
-
-	if (keyListener[0] == 'w' && player.position.y > 0)
-	{
-		new_y -= 3;
-	}
-	else if (keyListener[1] == 's' && player.position.y < (renderer.height - player.texture.height))
-	{
-		new_y += 3;
-	}
-	if (keyListener[2] == 'a' && player.position.x > 0)
-	{
-		new_x -= 3;
-	}
-	else if (keyListener[3] == 'd' && player.position.x < (renderer.width - player.texture.width))
-	{
-		new_x += 3;
-	}
-	createjs.Tween.get(player.position).to({x: new_x, y: new_y}, 50);
-
-	if (keyListener[4] == 'j' && !bullet_timer.isStarted)
-	{
-		shoot(player.position.x + 120, player.position.y + 50);
-		bullet_timer.start();
-	}
-
-	for(var b=bullets.length-1;b>=0;b--)
-	{
-		bullets[b].position.x += bulletSpeed;
-  	}
 	asteroid_5.tilePosition.x -= 3;
 	asteroid_10.tilePosition.x -= 2;
 	asteroid_15.tilePosition.x -= 1;
 	asteroid_20.tilePosition.x -= 0.5;
+	if (menu.parent == undefined)
+	{
+		if (keyListener[0] == 'w' && player.position.y > 0)
+		{
+			new_y -= 3;
+		}
+		else if (keyListener[1] == 's' && player.position.y < (renderer.height - player.texture.height))
+		{
+			new_y += 3;
+		}
+		if (keyListener[2] == 'a' && player.position.x > 0)
+		{
+			new_x -= 3;
+		}
+		else if (keyListener[3] == 'd' && player.position.x < (renderer.width - player.texture.width))
+		{
+			new_x += 3;
+		}
+		createjs.Tween.get(player.position).to({x: new_x, y: new_y}, 50);
+	
+		if (keyListener[4] == 'j' && !bullet_timer.isStarted)
+		{
+			shoot(player.position.x + 120, player.position.y + 50);
+			bullet_timer.start();
+		}
+	
+		for(var b=bullets.length-1;b>=0;b--)
+		{
+			bullets[b].position.x += bulletSpeed;
+	  	}
+		coll_asteroid.position.x -= 1.5;
+		collider.position.set(coll_asteroid.position.x, coll_asteroid.position.y);
+		if (circle_rect_collide(collider, player))
+		{
+			player.texture = undefined;
+		}
+	}
 	PIXI.timerManager.update();
 	renderer.render(main);
 }
