@@ -327,11 +327,6 @@ function keydownEventHandler(e)
 		if (e.keyCode == 70) //F key
 		{
 			shoot(player.position.x + 120, player.position.y + 50);
-			
-		}
-		if (e.keyCode == 82)// R key
-		{
-			enemy_shoot(federalShip.position.x + 120, federalShip.position.y + 50, "normal");
 		}
 	}
 }
@@ -374,53 +369,6 @@ function shoot(pos_x, pos_y)
 	bullets.push(bullet);
 }
 
-/* * * * * * * * * * * * * * * * * * * * *
- * ENEMY INTERACTION                     *
- * Big shot, tri-shot, radial shot,      *
- * and honing shot defined here          *
- * * * * * * * * * * * * * * * * * * * * */
-// import federal ship texture
-var t_fed = PIXI.Texture.from("images/federalShip.png");
-var federalShip = new PIXI.Sprite(t_fed);
-federalShip.position.x = 900;
-federalShip.position.y = 300;
-main.addChild(federalShip);
-
-
-// big shot START HERE
-var t_bigShot = PIXI.Texture.from("images/enemy_bullet_big.png");
-var t_normShot = PIXI.Texture.from("images/enemy_bullet.png");
-var bullets = [];
-var bulletSpeed = 10;
-
-function enemy_shoot(pos_x, pos_y, bulletType)
-{
-	if(bulletType == "big")
-	{
-		var bullet = new PIXI.Sprite(t_bigShot);
-	}
-	else if(bulletType == "normal")
-	{
-		var bullet = new PIXI.Sprite(t_normShot);
-	}
-	// need bullets to go other way
-	bullet.position.x = pos_x;
-	bullet.position.y = pos_y;
-	bullet.scale.x = 0.5;
-	bullet.scale.y = 0.5;
-	main.addChild(bullet);
-	console.log('enemy bullet');
-	bullets.push(bullet);
-}
-
-// GAME LOOP - WITH TIMERS 
-// PIXI TIMER MANAGER - IN ANIMATE FUNCTION
-// AFTER ANIMATE, CREATE TIMER
-// SET ON START AND ON END (ON START DO THIS, ON END DO THAT NO PARTICULAR)
-// THEN CALL TIMER START OR TIMER END
-// PRIM UPLOADED PIXI TIMER
-
-
 //var sprite = new PIXI.TilingSprite(texture, renderer.width, renderer.height);
 //stage.addChild(sprite);
 
@@ -451,8 +399,6 @@ function animate()
 	{
 		bullets[b].position.x += bulletSpeed;
   	}
-
-	
 	asteroid_5.tilePosition.x -= 3;
 	asteroid_10.tilePosition.x -= 2;
 	asteroid_15.tilePosition.x -= 1;
