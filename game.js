@@ -326,8 +326,7 @@ function keydownEventHandler(e)
 		}
 		if (e.keyCode == 74) //J key
 		{
-<<<<<<< HEAD
-			shoot(player.position.x + 120, player.position.y + 50);
+			keyListener[4] = 'j';
 		}
 		if (e.keyCode == 82)// R key
 		{
