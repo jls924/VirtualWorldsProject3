@@ -296,14 +296,14 @@ cred_back.mousedown = function(ev)
 var t_player = PIXI.Texture.from("images/pirateShip.png");
 
 var player = new PIXI.Sprite(t_player);
-player.position.x = 100;
+player.position.x = 250;
 player.position.y = 300;
 main.addChild(player);
 
 //Player Behavior & input
 var new_x = player.position.x;
 var new_y = player.position.y;
-var keyListener = ['', '', '', ''];
+var keyListener = ['', '', '', '', ''];
 function keydownEventHandler(e)
 {
 	if (menu.parent == undefined)
@@ -324,9 +324,17 @@ function keydownEventHandler(e)
 		{
 			keyListener[3] = 'd';
 		}
-		if (e.keyCode == 70) //F key
+		if (e.keyCode == 74) //J key
 		{
+<<<<<<< HEAD
 			shoot(player.position.x + 120, player.position.y + 50);
+		}
+		if (e.keyCode == 82)// R key
+		{
+			enemy_shoot(federalShip.position.x + 120, federalShip.position.y + 50, "normal");
+=======
+			keyListener[4] = 'j';
+>>>>>>> master
 		}
 	}
 }
@@ -348,6 +356,10 @@ function keyupEventHandler(e)
 	{
 		keyListener[3] = '';
 	}
+	if (e.keyCode == 74)
+	{
+		keyListener[4] = '';
+	}
 }
 document.addEventListener('keydown', keydownEventHandler);
 document.addEventListener('keyup', keyupEventHandler);
@@ -356,6 +368,10 @@ document.addEventListener('keyup', keyupEventHandler);
 var t_bullet = PIXI.Texture.from("images/player_bullet.png");
 var bullets = [];
 var bulletSpeed = 10;
+var bullet_timer = PIXI.timerManager.createTimer(200);
+bullet_timer.on('end', function(elapsed) {
+	bullet_timer.reset();
+});
 
 function shoot(pos_x, pos_y)
 {
@@ -369,31 +385,87 @@ function shoot(pos_x, pos_y)
 	bullets.push(bullet);
 }
 
+<<<<<<< HEAD
+/* * * * * * * * * * * * * * * * * * * * *
+ * ENEMY INTERACTION                     *
+ * Big shot, tri-shot, radial shot,      *
+ * and honing shot defined here          *
+ * * * * * * * * * * * * * * * * * * * * */
+// import federal ship texture
+var t_fed = PIXI.Texture.from("images/federalShip.png");
+var federalShip = new PIXI.Sprite(t_fed);
+federalShip.position.x = 900;
+federalShip.position.y = 300;
+main.addChild(federalShip);
+
+
+// big shot START HERE
+var t_bigShot = PIXI.Texture.from("images/enemy_bullet_big.png");
+var t_normShot = PIXI.Texture.from("images/enemy_bullet.png");
+var bullets = [];
+var bulletSpeed = 10;
+
+function enemy_shoot(pos_x, pos_y, bulletType)
+{
+	if(bulletType == "big")
+	{
+		var bullet = new PIXI.Sprite(t_bigShot);
+	}
+	else if(bulletType == "normal")
+	{
+		var bullet = new PIXI.Sprite(t_normShot);
+	}
+	// need bullets to go other way
+	bullet.position.x = pos_x;
+	bullet.position.y = pos_y;
+	bullet.scale.x = 0.5;
+	bullet.scale.y = 0.5;
+	main.addChild(bullet);
+	console.log('enemy bullet');
+	bullets.push(bullet);
+}
+
+// GAME LOOP - WITH TIMERS 
+// PIXI TIMER MANAGER - IN ANIMATE FUNCTION
+// AFTER ANIMATE, CREATE TIMER
+// SET ON START AND ON END (ON START DO THIS, ON END DO THAT NO PARTICULAR)
+// THEN CALL TIMER START OR TIMER END
+// PRIM UPLOADED PIXI TIMER
+
+
 //var sprite = new PIXI.TilingSprite(texture, renderer.width, renderer.height);
 //stage.addChild(sprite);
 
+=======
+>>>>>>> master
 let count = 0;
 function animate() 
 {
 	requestAnimationFrame(animate);
 
-	if (keyListener[0] == 'w')
+	if (keyListener[0] == 'w' && player.position.y > 0)
 	{
 		new_y -= 3;
 	}
-	else if (keyListener[1] == 's')
+	else if (keyListener[1] == 's' && player.position.y < (renderer.height - player.texture.height))
 	{
 		new_y += 3;
 	}
-	if (keyListener[2] == 'a')
+	if (keyListener[2] == 'a' && player.position.x > 0)
 	{
 		new_x -= 3;
 	}
-	else if (keyListener[3] == 'd')
+	else if (keyListener[3] == 'd' && player.position.x < (renderer.width - player.texture.width))
 	{
 		new_x += 3;
 	}
 	createjs.Tween.get(player.position).to({x: new_x, y: new_y}, 50);
+
+	if (keyListener[4] == 'j' && !bullet_timer.isStarted)
+	{
+		shoot(player.position.x + 120, player.position.y + 50);
+		bullet_timer.start();
+	}
 
 	for(var b=bullets.length-1;b>=0;b--)
 	{
@@ -403,17 +475,7 @@ function animate()
 	asteroid_10.tilePosition.x -= 2;
 	asteroid_15.tilePosition.x -= 1;
 	asteroid_20.tilePosition.x -= 0.5;
-	/*
-	count +=0.005;
-	
-	tilingSprite.tileScale.x = 2 + Math.sin(count);
-	
-	tilingSprite.tileScale.y = 2 + Math.cos(count);
-
-	tilingSprite.tilePosition.x += 1;
-	tilingSprite.tilePosition.y += 1;
-	*/
-	
+	PIXI.timerManager.update();
 	renderer.render(main);
 }
 animate();
