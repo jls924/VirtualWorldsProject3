@@ -362,27 +362,6 @@ function keyupEventHandler(e)
 document.addEventListener('keydown', keydownEventHandler);
 document.addEventListener('keyup', keyupEventHandler);
 
-//Bullet & Shooting
-var t_bullet = PIXI.Texture.from("images/player_bullet.png");
-var bullets = [];
-var bulletSpeed = 10;
-var bullet_timer = PIXI.timerManager.createTimer(200);
-bullet_timer.on('end', function(elapsed) {
-	bullet_timer.reset();
-});
-
-function shoot(pos_x, pos_y)
-{
-	var bullet = new PIXI.Sprite(t_bullet);
-	bullet.position.x = pos_x;
-	bullet.position.y = pos_y;
-	bullet.scale.x = 0.5;
-	bullet.scale.y = 0.5;
-	stage.addChild(bullet);
-	console.log('ublett');
-	bullets.push(bullet);
-}
-
 //Collision & helper functions
 //Circle needs to be a PIXI.Graphics circle, square needs to be a sprite
 function clamp(coor, min, max)
@@ -398,8 +377,8 @@ function clamp(coor, min, max)
 function rect_clamp(point, rect)
 {
 	var clamp_p = new PIXI.Point();
-	var clx = clamp(point.x, rect.position.x, rect.position.x + rect.width);
-	var cly = clamp(point.y, rect.position.y, rect.position.y + rect.height);
+	var clx = clamp(point.x, rect.x, rect.x + rect.width);
+	var cly = clamp(point.y, rect.y, rect.y + rect.height);
 	clamp_p.set(clx, cly);
 	return clamp_p;
 }
@@ -423,6 +402,34 @@ function circle_rect_collide(circle, rect)
 	return circle_point_collide(circle, n_point);
 }
 
+//Bullet & Shooting
+var t_bullet = PIXI.Texture.from("images/player_bullet.png");
+var bullets = [];
+var pbul_colliders = [];
+var bulletSpeed = 10;
+var bullet_timer = PIXI.timerManager.createTimer(200);
+bullet_timer.on('end', function(elapsed) {
+	bullet_timer.reset();
+});
+
+function shoot(pos_x, pos_y)
+{
+	var bullet = new PIXI.Sprite(t_bullet);
+	bullet.position.x = pos_x;
+	bullet.position.y = pos_y;
+	bullet.scale.x = 0.5;
+	bullet.scale.y = 0.5;
+	stage.addChild(bullet);
+	console.log('ublett');
+	bullets.push(bullet);
+
+	var b_collider = new PIXI.Graphics();
+	b_collider.beginFill(0,0);
+	b_collider.drawCircle(bullet.position.x, bullet.position.y, bullet.texture.width/4);
+	b_collider.endFill();
+	stage.addChild(b_collider);
+	pbul_colliders.push(b_collider);
+}
 
 /* * * * * * * * * * * * * * * * * * * * *
  * ENEMY INTERACTION                     *
@@ -432,9 +439,8 @@ function circle_rect_collide(circle, rect)
 // import federal ship texture
 var t_fed = PIXI.Texture.from("images/federalShip.png");
 var federalShip = new PIXI.Sprite(t_fed);
-federalShip.position.x = 2000;
+federalShip.position.x = 3600;
 federalShip.position.y = 300;
-//CHANGED FROM MAIN TO STAGE
 stage.addChild(federalShip);
 federalShip.alpha = 0;
 
@@ -447,7 +453,7 @@ var enemy_bulletSpeed = -10;
 // timer for small bullets
 var enemy_bullet_timer_norm = PIXI.timerManager.createTimer(200);
 enemy_bullet_timer_norm.on('end', function(elapsed) {  enemy_bullet_timer_norm.reset();});
-// ship appears 15 sec into gameplay
+// ship appears 15 sec into gameplay... pushed this back -Prim
 var ship_appearance = PIXI.timerManager.createTimer(15000);
 ship_appearance.on('end', function(elapsed) { federalShip.alpha = 1;});
 
@@ -473,21 +479,35 @@ function enemy_shoot_norm(pos_x, pos_y)
 // PRIM UPLOADED PIXI TIMER
 
 
-//var sprite = new PIXI.TilingSprite(texture, renderer.width, renderer.height);
-//stage.addChild(sprite);
-
-//Adding some test sprites here
+//I'm so sorry
+var ast_x = [1408,1504,1408,1536,1920,1984,2144,2144,2272,2592,2592,2592,2624,2624,2688,2720,2720,2848,2848,2880,2912,2976,3040,3040,3040,3136,3136,3168,3232,3232,3328,3392,3456,3616];
+var ast_y = [64,224,416,608,352,672,96,192,512,288,512,608,416,704,0,128,544,128,256,576,384,224,0,320,544,352,512,224,352,480,64,672,416,224];
+var ast_cluster = [];
+var colliders = [];
 var t_asteroid = new PIXI.Texture.from("images/asteroid_standard.png");
-var coll_asteroid = new PIXI.Sprite(t_asteroid);
-coll_asteroid.position.x = 2000;
-coll_asteroid.position.y = 140;
-stage.addChild(coll_asteroid);
+for (var i = 0; i <= ast_x.length; i++)
+{
+	var asteroid = new PIXI.Sprite(t_asteroid);
+	asteroid.position.x = ast_x[i];
+	asteroid.position.y = ast_y[i];
+	stage.addChild(asteroid);
+	ast_cluster.push(asteroid);
 
-var collider = new PIXI.Graphics();
-collider.beginFill(0,0);
-collider.drawCircle(coll_asteroid.position.x, coll_asteroid.position.y, coll_asteroid.texture.width/2);
-collider.endFill();
-stage.addChild(collider);
+	var collider = new PIXI.Graphics();
+	collider.beginFill(0,0);
+	collider.drawCircle(asteroid.position.x, asteroid.position.y, asteroid.texture.width/2);
+	collider.endFill();
+	stage.addChild(collider);
+	colliders.push(collider);
+
+}
+
+//Player hitbox
+var p_collider = new PIXI.Graphics();
+p_collider.beginFill(0,0);
+p_collider.drawRect(player.position.x, player.position.y, 200, 100);
+p_collider.endFill();
+stage.addChild(p_collider);
 
 let count = 0;
 function animate() 
@@ -516,6 +536,7 @@ function animate()
 			new_x += 3;
 		}
 		createjs.Tween.get(player.position).to({x: new_x, y: new_y}, 50);
+		p_collider.position.set(player.position.x-50, player.position.y - 10);
 	
 		if (keyListener[4] == 'j' && !bullet_timer.isStarted && !enemy_bullet_timer_norm.isStarted)
 		{
@@ -534,6 +555,8 @@ function animate()
 		for(var b=bullets.length-1;b>=0;b--)
 		{
 			bullets[b].position.x += bulletSpeed;
+			pbul_colliders[b].position.set(bullets[b].position.x, bullets[b].position.y);
+			//Insert enemy collision with player bullets here
 	  	}
 
 		for(var eb=enemybullets.length-1;eb>=0;eb--)
@@ -541,7 +564,7 @@ function animate()
 			enemybullets[eb].position.x += enemy_bulletSpeed;
 	  	}
 		federalShip.position.x -= 1;
-		console.log(federalShip.position.x);
+		//console.log(federalShip.position.x);
 		federalShip.position.y = +1;
 		if(federalShip.position.x == 300 && federalShip < 300)
 		{
@@ -554,15 +577,15 @@ function animate()
 			federalShip.position.y += 1;
 
 		}
-		
-		coll_asteroid.position.x -= 1.5;
-		
-		
-			
-		collider.position.set(coll_asteroid.position.x, coll_asteroid.position.y);
-		if (circle_rect_collide(collider, player))
+		for(var ast=0; ast < ast_cluster.length; ast++)
 		{
-			player.texture = undefined;
+			ast_cluster[ast].position.x -= 1.5;	
+			colliders[ast].position.set(ast_cluster[ast].position.x, ast_cluster[ast].position.y);
+			if (circle_rect_collide(colliders[ast], p_collider))
+			{
+				player.texture = undefined;
+				console.log('hit');
+			}
 		}
 	}
 	PIXI.timerManager.update();
