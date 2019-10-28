@@ -331,7 +331,6 @@ function keydownEventHandler(e)
 		}
 		if (e.keyCode == 82)// R key
 		{
-			enemy_shoot(federalShip.position.x + 120, federalShip.position.y + 50, "normal");
 			keyListener[4] = 'j';
 		}
 	}
@@ -442,27 +441,23 @@ stage.addChild(federalShip);
 // big shot START HERE
 var t_bigShot = PIXI.Texture.from("images/enemy_bullet_big.png");
 var t_normShot = PIXI.Texture.from("images/enemy_bullet.png");
-var bullets = [];
-var bulletSpeed = 10;
+var enemybullets = [];
+var enemy_bulletSpeed = -10;
+var enemy_bullet_timer = PIXI.timerManager.createTimer(200);
+enemy_bullet_timer.on('end', function(elapsed) {
+	enemy_bullet_timer.reset();
+});
 
-function enemy_shoot(pos_x, pos_y, bulletType)
+function enemy_shoot(pos_x, pos_y)
 {
-	if(bulletType == "big")
-	{
-		var bullet = new PIXI.Sprite(t_bigShot);
-	}
-	else if(bulletType == "normal")
-	{
-		var bullet = new PIXI.Sprite(t_normShot);
-	}
-	// need bullets to go other way
-	bullet.position.x = pos_x;
-	bullet.position.y = pos_y;
-	bullet.scale.x = 0.5;
-	bullet.scale.y = 0.5;
-	stage.addChild(bullet);
+	var enemybullet = new PIXI.Sprite(t_normShot);
+	enemybullet.position.x = pos_x;
+	enemybullet.position.y = pos_y;
+	enemybullet.scale.x = 0.5;
+	enemybullet.scale.y = 0.5;
+	stage.addChild(enemybullet);
 	console.log('enemy bullet');
-	bullets.push(bullet);
+	enemybullets.push(enemybullet);
 }
 
 // GAME LOOP - WITH TIMERS 
@@ -517,16 +512,24 @@ function animate()
 		}
 		createjs.Tween.get(player.position).to({x: new_x, y: new_y}, 50);
 	
-		if (keyListener[4] == 'j' && !bullet_timer.isStarted)
+		if (keyListener[4] == 'j' && !bullet_timer.isStarted && !enemy_bullet_timer.isStarted)
 		{
 			shoot(player.position.x + 120, player.position.y + 50);
+			enemy_shoot(federalShip.position.x + 120, federalShip.position.y + 50, "normal");
+			enemy_bullet_timer.start();
 			bullet_timer.start();
 		}
-	
+
 		for(var b=bullets.length-1;b>=0;b--)
 		{
 			bullets[b].position.x += bulletSpeed;
 	  	}
+
+		for(var eb=enemybullets.length-1;eb>=0;eb--)
+		{
+			enemybullets[eb].position.x += enemy_bulletSpeed;
+	  	}
+
 		coll_asteroid.position.x -= 1.5;
 		collider.position.set(coll_asteroid.position.x, coll_asteroid.position.y);
 		if (circle_rect_collide(collider, player))
