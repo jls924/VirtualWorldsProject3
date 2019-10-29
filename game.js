@@ -511,7 +511,6 @@ var federalShip = new PIXI.Sprite(t_fed);
 federalShip.position.x = 1600;
 federalShip.position.y = 300;
 stage.addChild(federalShip);
-federalShip.alpha = 0;
 
 var fed_hit = new PIXI.Graphics();
 fed_hit.beginFill(0,0);
@@ -523,13 +522,22 @@ stage.addChild(fed_hit);
 var t_bigShot = PIXI.Texture.from("images/enemy_bullet_big.png");
 var t_normShot = PIXI.Texture.from("images/enemy_bullet.png");
 var enemybullets = [];
+// enemy bullet colliders
+var bad_colliders = [];
 var enemy_bulletSpeed = -10;
+
+// waiting for ship to be on screen
+var start_bullet = PIXI.timerManager.createTimer(10000);
+
 // timer for small bullets
 var enemy_bullet_timer_norm = PIXI.timerManager.createTimer(200);
 enemy_bullet_timer_norm.on('end', function(elapsed) {  enemy_bullet_timer_norm.reset();});
-// ship appears 15 sec into gameplay...
-var ship_appearance = PIXI.timerManager.createTimer(15000);
-ship_appearance.on('end', function(elapsed) { federalShip.alpha = 1;});
+
+var ship_appearance = PIXI.timerManager.createTimer(10000);
+ship_appearance.on('start', function(elapsed) { federalShip.alpha = 1;});
+
+// if player kills ship
+ship_appearance.on('stop', function(elapsed) { federalShip.alpha = 0;});
 
 function enemy_shoot_norm(pos_x, pos_y)
 {
@@ -542,8 +550,16 @@ function enemy_shoot_norm(pos_x, pos_y)
 	stage.addChild(enemybullet);
 	console.log('enemy bullet');
 	enemybullets.push(enemybullet);
+
+	var en_collider = new PIXI.Graphics();
+	en_collider.beginFill(0,0);
+	en_collider.drawCircle(enemybullet.position.x, enemybullet.position.y, enemybullet.texture.width/4);
+	en_collider.endFill();
+	stage.addChild(en_collider);
+	bad_colliders.push(en_collider);
 	
 }
+
 
 // GAME LOOP - WITH TIMERS 
 // PIXI TIMER MANAGER - IN ANIMATE FUNCTION
@@ -553,7 +569,7 @@ function enemy_shoot_norm(pos_x, pos_y)
 // PRIM UPLOADED PIXI TIMER
 
 //Enemy HP handling
-var enemy_hp = 100;
+var enemy_hp = 10;
 var enemy_hurt = PIXI.Texture.from("images/federalShip_hurt.png");
 var enemy_red = PIXI.timerManager.createTimer(100);
 enemy_red.on('start', function(elapsed) {
@@ -561,7 +577,54 @@ enemy_red.on('start', function(elapsed) {
 	enemy_hp -= 1;
 });
 
-enemy_red.on('end', function(elapsed) {
+enemy_red.on('end', function(elapsed) {var fed_hit = new PIXI.Graphics();
+fed_hit.beginFill(0,0);
+fed_hit.drawRect(federalShip.position.x, federalShip.position.y, 300, 200);
+fed_hit.endFill();
+stage.addChild(fed_hit);
+
+// big shot START HERE
+var t_bigShot = PIXI.Texture.from("images/enemy_bullet_big.png");
+var t_normShot = PIXI.Texture.from("images/enemy_bullet.png");
+var enemybullets = [];
+// enemy bullet colliders
+var bad_colliders = [];
+var enemy_bulletSpeed = -10;
+
+// waiting for ship to be on screen
+var start_bullet = PIXI.timerManager.createTimer(10000);
+
+// timer for small bullets
+var enemy_bullet_timer_norm = PIXI.timerManager.createTimer(200);
+enemy_bullet_timer_norm.on('end', function(elapsed) {  enemy_bullet_timer_norm.reset();});
+
+var ship_appearance = PIXI.timerManager.createTimer(10000);
+ship_appearance.on('start', function(elapsed) { federalShip.alpha = 1;});
+
+// if player kills ship
+ship_appearance.on('stop', function(elapsed) { federalShip.alpha = 0;});
+
+function enemy_shoot_norm(pos_x, pos_y)
+{
+	var enemybullet = new PIXI.Sprite(t_normShot);
+	
+	enemybullet.position.x = pos_x;
+	enemybullet.position.y = pos_y;
+	enemybullet.scale.x = 0.5;
+	enemybullet.scale.y = 0.5;
+	stage.addChild(enemybullet);
+	console.log('enemy bullet');
+	enemybullets.push(enemybullet);
+
+	var en_collider = new PIXI.Graphics();
+	en_collider.beginFill(0,0);
+	en_collider.drawCircle(enemybullet.position.x, enemybullet.position.y, enemybullet.texture.width/4);
+	en_collider.endFill();
+	stage.addChild(en_collider);
+	bad_colliders.push(en_collider);
+	
+}
+
 	federalShip.texture = t_fed;
 	enemy_red.reset();
 });
@@ -643,6 +706,8 @@ function animate()
 	asteroid_10.tilePosition.x -= 2;
 	asteroid_15.tilePosition.x -= 1;
 	asteroid_20.tilePosition.x -= 0.5;
+	ship_appearance.start();
+	start_bullet.start();
 	if (player_hp <= 0)
 	{
 		game_over();
@@ -659,6 +724,14 @@ function animate()
 			p_collider.position.set(player.position.x-50, player.position.y - 10);
 		}
 	}
+	
+	console.log(enemy_hp);
+	if (enemy_hp <= 0)
+	{
+		enemy_bullet_timer_norm.stop();
+		federalShip.alpha = 0;
+	}
+
 	else if (menu.parent == undefined)
 	{
 		if (keyListener[0] == 'w' && player.position.y > 0)
@@ -680,18 +753,21 @@ function animate()
 		createjs.Tween.get(player.position).to({x: new_x, y: new_y}, 50);
 		p_collider.position.set(player.position.x-50, player.position.y - 10);
 	
-		if (keyListener[4] == 'j' && !bullet_timer.isStarted && !enemy_bullet_timer_norm.isStarted)
+		if (keyListener[4] == 'j' && !bullet_timer.isStarted)
 		{
 			var bullet_switch = ["normal", "big shot"];
 			shoot(player.position.x + 120, player.position.y + 50);
-			if(federalShip.alpha = 1)
-			{
-				enemy_shoot_norm(federalShip.position.x + 120, federalShip.position.y + 50);
-			}
+			
+			bullet_timer.start();
+			
+		}
+		
+		// once the ship appears
+		if(start_bullet.isEnded && !enemy_bullet_timer_norm.isStarted)
+		{
+			enemy_shoot_norm(federalShip.position.x + 120, federalShip.position.y + 50);
 			enemy_bullet_timer_norm.start();
 			
-			ship_appearance.start();
-			bullet_timer.start();
 		}
 
 		for(var b=bullets.length-1;b>=0;b--)
