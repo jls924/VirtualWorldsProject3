@@ -39,9 +39,9 @@ player.position.y = 300;
 main.addChild(player);
 
 //Music
-const theme_1 = PIXI.sound.Sound.from('audio/Beyond\ The\ Heart\ -\ Lena\ Raine.mp3');
-theme_1.loop = true;
-theme_1.play();
+//const theme_1 = PIXI.sound.Sound.from('audio/Beyond\ The\ Heart\ -\ Lena\ Raine.mp3');
+//theme_1.loop = true;
+//theme_1.play();
 
 
 /* * * * * * * * * * * * * * * * * * * * *
