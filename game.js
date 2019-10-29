@@ -149,7 +149,7 @@ menu2.addChild(opt_back);
 //Menu 3
 var menu3 = new PIXI.Sprite(t_menu3);
 var cred_back = new PIXI.Sprite(t_back_neutral);
-cred_back.position.x = 174;
+cred_back.position.x = 204;
 cred_back.position.y = 528;
 cred_back.interactive = true;
 menu3.addChild(cred_back);
@@ -301,6 +301,31 @@ cred_back.mousedown = function(ev)
 	menu_bkd.addChild(menu1);
 }
 
+//Player HP handling
+var player_hp = 3;
+var player_hurt = PIXI.Texture.from("images/pirateShip_hurt.png");
+var hittable = true;
+var player_cd = PIXI.timerManager.createTimer(250);
+player_cd.repeat = 8;
+player_cd.on('start', function(elapsed) {
+	player_hp -= 1;
+	hittable = false;
+});
+player_cd.on('end', function(elapsed) {
+	hittable = true;
+	player_cd.reset();
+});
+player_cd.on('repeat', function(elapsed, repeat) {
+	if (repeat == 2 || repeat == 4 || repeat == 6 || repeat == 8)
+	{
+		player.texture = t_player;
+	}
+	else
+	{
+		player.texture = player_hurt;
+	}
+});
+
 //Player Behavior & input
 var new_x = player.position.x;
 var new_y = player.position.y;
@@ -439,11 +464,16 @@ function shoot(pos_x, pos_y)
 // import federal ship texture
 var t_fed = PIXI.Texture.from("images/federalShip.png");
 var federalShip = new PIXI.Sprite(t_fed);
-federalShip.position.x = 3600;
+federalShip.position.x = 1600;
 federalShip.position.y = 300;
 stage.addChild(federalShip);
 federalShip.alpha = 0;
 
+var fed_hit = new PIXI.Graphics();
+fed_hit.beginFill(0,0);
+fed_hit.drawRect(federalShip.position.x, federalShip.position.y, 300, 200);
+fed_hit.endFill();
+stage.addChild(fed_hit);
 
 // big shot START HERE
 var t_bigShot = PIXI.Texture.from("images/enemy_bullet_big.png");
@@ -453,7 +483,7 @@ var enemy_bulletSpeed = -10;
 // timer for small bullets
 var enemy_bullet_timer_norm = PIXI.timerManager.createTimer(200);
 enemy_bullet_timer_norm.on('end', function(elapsed) {  enemy_bullet_timer_norm.reset();});
-// ship appears 15 sec into gameplay... pushed this back -Prim
+// ship appears 15 sec into gameplay...
 var ship_appearance = PIXI.timerManager.createTimer(15000);
 ship_appearance.on('end', function(elapsed) { federalShip.alpha = 1;});
 
@@ -478,6 +508,19 @@ function enemy_shoot_norm(pos_x, pos_y)
 // THEN CALL TIMER START OR TIMER END
 // PRIM UPLOADED PIXI TIMER
 
+//Enemy HP handling
+var enemy_hp = 100;
+var enemy_hurt = PIXI.Texture.from("images/federalShip_hurt.png");
+var enemy_red = PIXI.timerManager.createTimer(100);
+enemy_red.on('start', function(elapsed) {
+	federalShip.texture = enemy_hurt;
+	enemy_hp -= 1;
+});
+
+enemy_red.on('end', function(elapsed) {
+	federalShip.texture = t_fed;
+	enemy_red.reset();
+});
 
 //I'm so sorry
 var ast_x = [1408,1504,1408,1536,1920,1984,2144,2144,2272,2592,2592,2592,2624,2624,2688,2720,2720,2848,2848,2880,2912,2976,3040,3040,3040,3136,3136,3168,3232,3232,3328,3392,3456,3616];
@@ -509,6 +552,45 @@ p_collider.drawRect(player.position.x, player.position.y, 200, 100);
 p_collider.endFill();
 stage.addChild(p_collider);
 
+var empty = PIXI.Texture.from("images/empty.png");
+var explosion = PIXI.Texture.from("images/explosion.png");
+
+var t_retry = PIXI.Texture.from("images/game_over.png");
+var retry = new PIXI.Sprite(empty);
+retry.position.x = 250;
+retry.position.y = 100;
+main.addChild(retry);
+
+var expl_timer = PIXI.timerManager.createTimer(1000);
+expl_timer.on('start', function(elapsed) {
+	player.texture = explosion;
+});
+expl_timer.on('end', function(elapsed) {
+	player.texture = empty;
+	retry.texture = t_retry;
+});
+
+//Game Over and Victory
+function game_over()
+{
+	if (player_hp <= 0)
+	{
+		player_cd.stop();
+		player_cd.reset();
+		stage.removeChild(player);
+		main.removeChild(stage);
+		main.addChild(player);
+		expl_timer.start();
+		for (var i = 0; i <= ast_x.length; i++)
+		{
+			ast_cluster[i].position.x = ast_x[i];
+			ast_cluster[i].position.y = ast_y[i];
+		}
+		federalShip.position.x = 1600;
+		federalShip.position.y = 300;
+	}
+}
+
 let count = 0;
 function animate() 
 {
@@ -517,7 +599,20 @@ function animate()
 	asteroid_10.tilePosition.x -= 2;
 	asteroid_15.tilePosition.x -= 1;
 	asteroid_20.tilePosition.x -= 0.5;
-	if (menu.parent == undefined)
+	if (player_hp <= 0)
+	{
+		game_over();
+		if (keyListener[4] == 'j' && expl_timer.isEnded)
+		{
+			retry.texture = empty;
+			expl_timer.stop();
+			player.texture = t_player;
+			main.addChild(stage);
+			player_hp = 3;
+			expl_timer.reset();
+		}
+	}
+	else if (menu.parent == undefined)
 	{
 		if (keyListener[0] == 'w' && player.position.y > 0)
 		{
@@ -556,7 +651,11 @@ function animate()
 		{
 			bullets[b].position.x += bulletSpeed;
 			pbul_colliders[b].position.set(bullets[b].position.x, bullets[b].position.y);
-			//Insert enemy collision with player bullets here
+			if (circle_rect_collide(pbul_colliders[b], fed_hit) && pbul_colliders[b].texture != empty)
+			{
+				enemy_red.start();
+				pbul_colliders[b].texture = empty;
+			}
 	  	}
 
 		for(var eb=enemybullets.length-1;eb>=0;eb--)
@@ -566,6 +665,7 @@ function animate()
 		federalShip.position.x -= 1;
 		//console.log(federalShip.position.x);
 		federalShip.position.y = +1;
+		fed_hit.position.set(federalShip.position.x, federalShip.position.y);
 		if(federalShip.position.x == 300 && federalShip < 300)
 		{
 			federalShip.position.x += 1;
@@ -581,9 +681,9 @@ function animate()
 		{
 			ast_cluster[ast].position.x -= 1.5;	
 			colliders[ast].position.set(ast_cluster[ast].position.x, ast_cluster[ast].position.y);
-			if (circle_rect_collide(colliders[ast], p_collider))
+			if (circle_rect_collide(colliders[ast], p_collider) && hittable)
 			{
-				player.texture = undefined;
+				player_cd.start();
 				console.log('hit');
 			}
 		}
