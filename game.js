@@ -39,10 +39,18 @@ player.position.y = 300;
 main.addChild(player);
 
 //Music
+var music_vol = 1;
 //const theme_1 = PIXI.sound.Sound.from('audio/Beyond\ The\ Heart\ -\ Lena\ Raine.mp3');
 //theme_1.loop = true;
 //theme_1.play();
 
+//Sounds
+const bloop = PIXI.sound.Sound.from('audio/bloop.mp3');
+const a_shoot = PIXI.sound.Sound.from('audio/shoot.mp3');
+const a_game_over = PIXI.sound.Sound.from('audio/fail.mp3');
+const a_hurt = PIXI.sound.Sound.from('audio/hurt.mp3');
+const a_big_shot = PIXI.sound.Sound.from('audio/big_shot.mp3');
+var sound_vol = 1;
 
 /* * * * * * * * * * * * * * * * * * * * *
  * MAIN MENU                             *
@@ -124,7 +132,8 @@ loud1.interactive = true;
 menu2.addChild(loud1);
 
 //Effects Volume
-var volume2 = new PIXI.Sprite(t_volume[9]);
+var vol_count2 = 9;
+var volume2 = new PIXI.Sprite(t_volume[vol_count2]);
 volume2.position.x = 114;
 volume2.position.y = 387;
 menu2.addChild(volume2);
@@ -162,6 +171,7 @@ play.hitArea = new PIXI.Rectangle(0, 0, 128, 64);
 play.mouseover = function(ev)
 {
 	play.texture = play_active;
+	bloop.play();
 }
 play.mouseout = function(ev)
 {
@@ -179,6 +189,7 @@ options.hitArea = new PIXI.Rectangle(0, 0, 220, 64);
 options.mouseover = function(ev)
 {
 	options.texture = options_active;
+	bloop.play();
 }
 options.mouseout = function(ev)
 {
@@ -194,6 +205,7 @@ credits.hitArea = new PIXI.Rectangle(0, 0, 200, 64);
 credits.mouseover = function(ev)
 {
 	credits.texture = credits_active;
+	bloop.play();
 }
 credits.mouseout = function(ev)
 {
@@ -209,6 +221,7 @@ quiet1.hitArea = new PIXI.Rectangle(0, 0, 75, 53);
 quiet1.mouseover = function(ev)
 {
 	quiet1.texture = t_quiet_active;
+	bloop.play();
 }
 quiet1.mouseout = function(ev)
 {
@@ -216,9 +229,10 @@ quiet1.mouseout = function(ev)
 }
 quiet1.mousedown = function(ev)
 {
-	if (theme_1.volume > 0)
+	if (music_vol > 0)
 	{
-		theme_1.volume -= 0.125;
+		music_vol -= 0.125;
+		//theme_1.volume = music_vol;
 		vol_count1 -= 1;
 		volume1.texture = t_volume[vol_count1];
 	}
@@ -228,6 +242,7 @@ loud1.hitArea = new PIXI.Rectangle(0, 0, 75, 53);
 loud1.mouseover = function(ev)
 {
 	loud1.texture = t_loud_active;
+	bloop.play();
 }
 loud1.mouseout = function(ev)
 {
@@ -235,9 +250,10 @@ loud1.mouseout = function(ev)
 }
 loud1.mousedown = function(ev)
 {
-	if (theme_1.volume < 1)
+	if (music_vol < 1)
 	{
-		theme_1.volume += 0.125;
+		music_vol += 0.125;
+		//theme_1.volume = music_vol;
 		vol_count1 += 1;
 		volume1.texture = t_volume[vol_count1];
 	}
@@ -247,6 +263,7 @@ quiet2.hitArea = new PIXI.Rectangle(0, 0, 75, 53);
 quiet2.mouseover = function(ev)
 {
 	quiet2.texture = t_quiet_active;
+	bloop.play();
 }
 quiet2.mouseout = function(ev)
 {
@@ -254,13 +271,25 @@ quiet2.mouseout = function(ev)
 }
 quiet2.mousedown = function(ev)
 {
-	//TODO
+	if (sound_vol > 0)
+	{
+		sound_vol -= 0.125;
+		bloop.volume = sound_vol;
+		bloop.play();
+		a_shoot.volume = sound_vol;
+		a_game_over.volume = sound_vol;
+		a_hurt.volume = sound_vol;
+		a_big_shot.volume = sound_vol;
+		vol_count2 -= 1;
+		volume2.texture = t_volume[vol_count2];
+	}
 }
 
 loud2.hitArea = new PIXI.Rectangle(0, 0, 75, 53);
 loud2.mouseover = function(ev)
 {
 	loud2.texture = t_loud_active;
+	bloop.play();
 }
 loud2.mouseout = function(ev)
 {
@@ -268,13 +297,25 @@ loud2.mouseout = function(ev)
 }
 loud2.mousedown = function(ev)
 {
-	//TODO
+	if (sound_vol < 1)
+	{
+		sound_vol += 0.125;
+		bloop.volume = sound_vol;
+		bloop.play();
+		a_shoot.volume = sound_vol;
+		a_game_over.volume = sound_vol;
+		a_hurt.volume = sound_vol;
+		a_big_shot.volume = sound_vol;
+		vol_count2 += 1;
+		volume2.texture = t_volume[vol_count2];
+	}
 }
 
 opt_back.hitArea = new PIXI.Rectangle(0, 0, 120, 45);
 opt_back.mouseover = function(ev)
 {
 	opt_back.texture = t_back_active;
+	bloop.play();
 }
 opt_back.mouseout = function(ev)
 {
@@ -290,6 +331,7 @@ cred_back.hitArea = new PIXI.Rectangle(0, 0, 120, 45);
 cred_back.mouseover = function(ev)
 {
 	cred_back.texture = t_back_active;
+	bloop.play();
 }
 cred_back.mouseout = function(ev)
 {
@@ -308,6 +350,7 @@ var hittable = true;
 var player_cd = PIXI.timerManager.createTimer(250);
 player_cd.repeat = 8;
 player_cd.on('start', function(elapsed) {
+	a_hurt.play();
 	player_hp -= 1;
 	hittable = false;
 });
@@ -454,6 +497,7 @@ function shoot(pos_x, pos_y)
 	b_collider.endFill();
 	stage.addChild(b_collider);
 	pbul_colliders.push(b_collider);
+	a_shoot.play();
 }
 
 /* * * * * * * * * * * * * * * * * * * * *
@@ -563,6 +607,7 @@ main.addChild(retry);
 
 var expl_timer = PIXI.timerManager.createTimer(1000);
 expl_timer.on('start', function(elapsed) {
+	a_game_over.play();
 	player.texture = explosion;
 });
 expl_timer.on('end', function(elapsed) {
@@ -576,7 +621,6 @@ function game_over()
 	if (player_hp <= 0)
 	{
 		player_cd.stop();
-		player_cd.reset();
 		stage.removeChild(player);
 		main.removeChild(stage);
 		main.addChild(player);
@@ -608,8 +652,11 @@ function animate()
 			expl_timer.stop();
 			player.texture = t_player;
 			main.addChild(stage);
+			main.removeChild(player);
+			stage.addChild(player);
 			player_hp = 3;
 			expl_timer.reset();
+			p_collider.position.set(player.position.x-50, player.position.y - 10);
 		}
 	}
 	else if (menu.parent == undefined)
