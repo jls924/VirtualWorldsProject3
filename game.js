@@ -43,6 +43,9 @@ var music_vol = 1;
 //const theme_1 = PIXI.sound.Sound.from('audio/Beyond\ The\ Heart\ -\ Lena\ Raine.mp3');
 //theme_1.loop = true;
 //theme_1.play();
+const theme_1 = PIXI.sound.Sound.from('audio/overseer.mp3');
+theme_1.loop = true;
+theme_1.play();
 
 //Sounds
 const bloop = PIXI.sound.Sound.from('audio/bloop.mp3');
@@ -232,7 +235,7 @@ quiet1.mousedown = function(ev)
 	if (music_vol > 0)
 	{
 		music_vol -= 0.125;
-		//theme_1.volume = music_vol;
+		theme_1.volume = music_vol;
 		vol_count1 -= 1;
 		volume1.texture = t_volume[vol_count1];
 	}
@@ -253,7 +256,7 @@ loud1.mousedown = function(ev)
 	if (music_vol < 1)
 	{
 		music_vol += 0.125;
-		//theme_1.volume = music_vol;
+		theme_1.volume = music_vol;
 		vol_count1 += 1;
 		volume1.texture = t_volume[vol_count1];
 	}
@@ -347,12 +350,15 @@ cred_back.mousedown = function(ev)
 var player_hp = 3;
 var player_hurt = PIXI.Texture.from("images/pirateShip_hurt.png");
 var hittable = true;
+let player_health = new PIXI.Text("HP: " + player_hp,{fontFamily : 'Arial', fontSize: 36, fill : 0xa11fa}); 
+stage.addChild(player_health);
 var player_cd = PIXI.timerManager.createTimer(250);
 player_cd.repeat = 8;
 player_cd.on('start', function(elapsed) {
 	a_hurt.play();
 	player_hp -= 1;
 	hittable = false;
+	player_health.text = "HP: " + player_hp;
 });
 player_cd.on('end', function(elapsed) {
 	hittable = true;
@@ -508,7 +514,7 @@ function shoot(pos_x, pos_y)
 // import federal ship texture
 var t_fed = PIXI.Texture.from("images/federalShip.png");
 var federalShip = new PIXI.Sprite(t_fed);
-federalShip.position.x = 1600;
+federalShip.position.x = 3500;
 federalShip.position.y = 300;
 stage.addChild(federalShip);
 
